@@ -2,21 +2,45 @@ import { isBlank } from '../utils'
 
 let activeEffect
 class ReactiveEffect {
+    deps = []
+    active = true
+    onStop?: () => void
     constructor(private fn: Function, public scheduler?: Function) { }
     run() {
         activeEffect = this
         return this.fn()
     }
+    stop() {
+        if (this.active) {
+            clearupEffect(this)
+            if (this.onStop) {
+                this.onStop()
+            }
+            this.active = false
+        }
+    }
 }
 
+function clearupEffect(effect) {
+    effect.deps.forEach((dep: any) => {
+        dep.delete(effect)
+    })
+}
 /**
  * vue作用域创建
  * @param fn - 运行时将被调用的函数
  */
 export function effect(fn, options: any = {}) {
     const _effect = new ReactiveEffect(fn, options.scheduler)
+
+    Object.assign(_effect, options)
+
     _effect.run()
-    return _effect.run.bind(activeEffect)
+
+    const runner: any = _effect.run.bind(activeEffect)
+    runner.effect = _effect
+
+    return runner
 }
 // 收集依赖数据
 const targetMap = new Map()
@@ -37,7 +61,10 @@ export function track(target, key) {
         dep = new Set()
         depsMap.set(key, dep)
     }
+
+    if (!activeEffect) return
     dep.add(activeEffect)
+    activeEffect.deps.push(dep)
 }
 
 /**
@@ -55,4 +82,8 @@ export function trigger(target, key) {
             effect.run()
         }
     }
+}
+
+export function stop(runner) {
+    runner.effect.stop()
 }
