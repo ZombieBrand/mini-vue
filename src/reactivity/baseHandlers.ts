@@ -1,7 +1,13 @@
 import { track, trigger } from './effect';
-
+import { ReactiveFlags } from './reactive';
 const createGetter = (isReadonly = false) => {
     return function getter(target, key) {
+        if (key === ReactiveFlags.IS_REACTIVE) {
+            return !isReadonly
+        }
+        if (key === ReactiveFlags.IS_READONLY) {
+            return isReadonly
+        }
         const res = Reflect.get(target, key)
         if (!isReadonly) {
             // 依赖收集
@@ -12,7 +18,7 @@ const createGetter = (isReadonly = false) => {
 };
 
 const createSetter = (isReadonly = false) => {
-    return function set(target, key, value) {
+    return function set(target, key, value): boolean {
         if (!isReadonly) {
             const res: boolean = Reflect.set(target, key, value)
             // 触发依赖

@@ -1,10 +1,12 @@
-import { readonly } from '../reactive'
+import { readonly, isReadonly } from '../reactive';
 describe('readonly', () => {
     it("happy path", () => {
         const original = { foo: 1, bar: { baz: 2 } }
         const wrapped = readonly(original)
         expect(wrapped).not.toBe(original)
         expect(wrapped.foo).toBe(1)
+        expect(isReadonly(wrapped)).toBe(true)
+        expect(isReadonly(original)).toBe(false)
     })
 
     it("触发set返回警告", () => {
@@ -13,6 +15,7 @@ describe('readonly', () => {
             age: 10
         })
         user.age = 11
+        // 修改readonly响应式对象的property的值会调用console.warn发出警告 
         expect(console.warn).toBeCalled()
     })
 })
