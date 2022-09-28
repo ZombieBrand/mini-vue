@@ -1,12 +1,22 @@
-import { isBlank } from '../utils'
-
-let activeEffect
+let activeEffect: ReactiveEffect
+// 收集依赖的数据结构
+// targetMap : {
+//   target : {
+//     deps: [eff, eff1, eff2]
+//   }
+// }
+type EffectKey = string
+const targetMap = new WeakMap<Record<EffectKey, any>, Map<EffectKey, Set<ReactiveEffect>>>()
 class ReactiveEffect {
-    deps = []
+    //用于存储与当前实例相关的响应式对象的property对应的Set实例
+    deps: Set<ReactiveEffect>[] = []
+    //用于记录当前实例的状态，为ture时为调用stop方法，否则一调用，避免重复防止重复调用 stop 方法
     active = true
     onStop?: () => void
     constructor(private fn: Function, public scheduler?: Function) { }
     run() {
+        // 为什么要在这里把this赋值给activeEffect呢？因为这里是fn执行之前，就是track依赖收集执行之前，又是effect开始执行之后，
+        // this能捕捉到这个依赖，将这个依赖赋值给activeEffect是刚刚好的时机
         activeEffect = this
         return this.fn()
     }
@@ -42,27 +52,26 @@ export function effect(fn, options: any = {}) {
 
     return runner
 }
-// 收集依赖数据
-const targetMap = new Map()
+
+
 
 /**
  * 依赖收集方法
  * @param target - 正在观察的对象
  * @param key - 正在观察的属性名称
  */
-export function track(target, key) {
+export function track(target: Record<EffectKey, any>, key: EffectKey) {
+    if (!activeEffect) return
     let depsMap = targetMap.get(target)
-    if (isBlank(depsMap)) {
+    if (!depsMap) {
         depsMap = new Map()
         targetMap.set(target, depsMap)
     }
     let dep = depsMap.get(key)
-    if (isBlank(dep)) {
+    if (!dep) {
         dep = new Set()
         depsMap.set(key, dep)
     }
-
-    if (!activeEffect) return
     dep.add(activeEffect)
     activeEffect.deps.push(dep)
 }
@@ -72,14 +81,16 @@ export function track(target, key) {
  * @param target - 正在观察的对象
  * @param key - 正在观察的属性名称
  */
-export function trigger(target, key) {
+export function trigger(target: Record<EffectKey, any>, key: EffectKey) {
     let depsMap = targetMap.get(target)
-    let dep = depsMap.get(key)
-    for (const effect of dep) {
-        if (effect.scheduler) {
-            effect.scheduler()
-        } else {
-            effect.run()
+    let dep = depsMap?.get(key)
+    if (dep) {
+        for (const effect of dep) {
+            if (effect.scheduler) {
+                effect.scheduler()
+            } else {
+                effect.run()
+            }
         }
     }
 }
