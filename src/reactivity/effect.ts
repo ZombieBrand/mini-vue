@@ -31,7 +31,7 @@ class ReactiveEffect {
     }
 }
 
-function clearupEffect(effect) {
+function clearupEffect(effect: ReactiveEffect) {
     effect.deps.forEach((dep: any) => {
         dep.delete(effect)
     })
@@ -40,7 +40,7 @@ function clearupEffect(effect) {
  * vue作用域创建
  * @param fn - 运行时将被调用的函数
  */
-export function effect(fn, options: any = {}) {
+export function effect(fn: Function, options: any = {}) {
     const _effect = new ReactiveEffect(fn, options.scheduler)
 
     Object.assign(_effect, options)

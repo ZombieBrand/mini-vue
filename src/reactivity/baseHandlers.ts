@@ -1,7 +1,7 @@
 import { track, trigger } from './effect';
 import { ReactiveFlags } from './reactive';
 const createGetter = (isReadonly = false) => {
-    return function getter(target, key) {
+    return function getter(target: object, key: PropertyKey) {
         if (key === ReactiveFlags.IS_REACTIVE) {
             return !isReadonly
         }
@@ -18,14 +18,14 @@ const createGetter = (isReadonly = false) => {
 };
 
 const createSetter = (isReadonly = false) => {
-    return function set(target, key, value): boolean {
+    return function set(target: object, key: PropertyKey, value: any): boolean {
         if (!isReadonly) {
             const res: boolean = Reflect.set(target, key, value)
             // 触发依赖
             trigger(target, key as string)
             return res
         } else {
-            console.warn(`key:${key}不可更改,因为是readonly`)
+            console.warn(`key:${key.toString()}不可更改,因为是readonly`)
             return true
         }
     }
