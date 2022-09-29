@@ -1,3 +1,4 @@
+let shouldTrack = false
 let activeEffect: ReactiveEffect
 // 收集依赖的数据结构
 // targetMap : {
@@ -10,15 +11,21 @@ const targetMap = new WeakMap<Record<EffectKey, any>, Map<EffectKey, Set<Reactiv
 class ReactiveEffect {
     //用于存储与当前实例相关的响应式对象的property对应的Set实例
     deps: Set<ReactiveEffect>[] = []
-    //用于记录当前实例的状态，为ture时为调用stop方法，否则一调用，避免重复防止重复调用 stop 方法
+    //用于记录当前实例的状态，为 true 时为调用stop方法，否则一调用，避免重复防止重复调用 stop 方法
     active = true
     onStop?: () => void
     constructor(private fn: Function, public scheduler?: Function) { }
     run() {
         // 为什么要在这里把this赋值给activeEffect呢？因为这里是fn执行之前，就是track依赖收集执行之前，又是effect开始执行之后，
         // this能捕捉到这个依赖，将这个依赖赋值给activeEffect是刚刚好的时机
+        if (!this.active) {
+            return this.fn()
+        }
+        shouldTrack = true
         activeEffect = this
-        return this.fn()
+        const result = this.fn()
+        shouldTrack = false
+        return result
     }
     stop() {
         if (this.active) {
@@ -35,6 +42,7 @@ function clearupEffect(effect: ReactiveEffect) {
     effect.deps.forEach((dep: any) => {
         dep.delete(effect)
     })
+    effect.deps.length = 0
 }
 /**
  * vue作用域创建
@@ -61,17 +69,23 @@ export function effect(fn: Function, options: any = {}) {
  * @param key - 正在观察的属性名称
  */
 export function track(target: Record<EffectKey, any>, key: EffectKey) {
-    if (!activeEffect) return
+    if (!isTracking()) return
+
     let depsMap = targetMap.get(target)
+
     if (!depsMap) {
         depsMap = new Map()
         targetMap.set(target, depsMap)
     }
+
     let dep = depsMap.get(key)
+
     if (!dep) {
         dep = new Set()
         depsMap.set(key, dep)
     }
+
+    if (dep.has(activeEffect)) return
     dep.add(activeEffect)
     activeEffect.deps.push(dep)
 }
@@ -95,6 +109,12 @@ export function trigger(target: Record<EffectKey, any>, key: EffectKey) {
     }
 }
 
+// 停止追踪
 export function stop(runner) {
     runner.effect.stop()
+}
+
+// 正在跟踪
+function isTracking() {
+    return shouldTrack && activeEffect !== undefined
 }
