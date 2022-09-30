@@ -21,6 +21,10 @@ export const isReactive = (value: object) => {
 export const isReadonly = (value: object) => {
     return !!Reflect.get(value, ReactiveFlags.IS_READONLY)
 }
+export const isProxy = (value: object) => {
+    return isReactive(value) || isReadonly(value)
+};
+
 export enum ReactiveFlags {
     IS_REACTIVE = "__v_isReactive",
     IS_READONLY = "__v_isReadonly"
