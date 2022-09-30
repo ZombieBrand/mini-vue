@@ -1,5 +1,6 @@
 import { track, trigger } from './effect';
-import { ReactiveFlags } from './reactive';
+import { ReactiveFlags, reactive, readonly } from './reactive';
+import { isObjectLike } from '../utils'
 const createGetter = (isReadonly = false) => {
     return function getter(target: object, key: PropertyKey) {
         if (key === ReactiveFlags.IS_REACTIVE) {
@@ -9,10 +10,15 @@ const createGetter = (isReadonly = false) => {
             return isReadonly
         }
         const res = Reflect.get(target, key)
+        // 检查获取的值是不是object
+        if (isObjectLike(res)) {
+            return isReadonly ? readonly(res) : reactive(res)
+        }
         if (!isReadonly) {
             // 依赖收集
             track(target, key as string)
         }
+
         return res
     }
 };
