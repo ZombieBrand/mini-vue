@@ -1,4 +1,4 @@
-import { mutableHandlers, readonlyHandlers } from './baseHandlers'
+import { mutableHandlers, readonlyHandlers, shallowReadonlyHandlers } from './baseHandlers'
 
 export function reactive(raw: Record<string, any>) {
     return createActiveObject(raw, mutableHandlers)
@@ -8,6 +8,9 @@ export const readonly = (raw: Record<string, any>) => {
     return createActiveObject(raw, readonlyHandlers)
 };
 
+export const shallowReadonly = (raw: Record<string, any>) => {
+    return createActiveObject(raw, shallowReadonlyHandlers)
+}
 function createActiveObject(raw: Record<string, any>, baseHandlers: ProxyHandler<any>) {
     return new Proxy(raw, baseHandlers)
 }

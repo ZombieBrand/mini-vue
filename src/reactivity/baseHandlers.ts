@@ -1,7 +1,7 @@
 import { track, trigger } from './effect';
 import { ReactiveFlags, reactive, readonly } from './reactive';
 import { isObjectLike } from '../utils'
-const createGetter = (isReadonly = false) => {
+const createGetter = (isReadonly = false, shallow = false) => {
     return function getter(target: object, key: PropertyKey) {
         if (key === ReactiveFlags.IS_REACTIVE) {
             return !isReadonly
@@ -10,6 +10,11 @@ const createGetter = (isReadonly = false) => {
             return isReadonly
         }
         const res = Reflect.get(target, key)
+
+        // 是否浅层响应式
+        if (shallow) {
+            return res
+        }
         // 检查获取的值是不是object
         if (isObjectLike(res)) {
             return isReadonly ? readonly(res) : reactive(res)
@@ -41,7 +46,7 @@ const get = createGetter()
 const set = createSetter()
 const readonlyGet = createGetter(true)
 const readonlySet = createSetter(true)
-
+const shallowReadonlyGet = createGetter(true, true)
 export const mutableHandlers = {
     get,
     set
@@ -49,5 +54,10 @@ export const mutableHandlers = {
 
 export const readonlyHandlers = {
     get: readonlyGet,
+    set: readonlySet
+}
+
+export const shallowReadonlyHandlers = {
+    get: shallowReadonlyGet,
     set: readonlySet
 }
