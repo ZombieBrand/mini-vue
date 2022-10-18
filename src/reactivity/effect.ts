@@ -85,10 +85,15 @@ export function track(target: Record<EffectKey, any>, key: EffectKey) {
         depsMap.set(key, dep)
     }
 
+    trackEffects(dep)
+}
+
+export const trackEffects = (dep: Set<any>) => {
+    // 看看dep之前是否添加过,添加过那么就不push了
     if (dep.has(activeEffect)) return
     dep.add(activeEffect)
     activeEffect.deps.push(dep)
-}
+};
 
 /**
  * 触发收集的依赖
@@ -99,15 +104,19 @@ export function trigger(target: Record<EffectKey, any>, key: EffectKey) {
     let depsMap = targetMap.get(target)
     let dep = depsMap?.get(key)
     if (dep) {
-        for (const effect of dep) {
-            if (effect.scheduler) {
-                effect.scheduler()
-            } else {
-                effect.run()
-            }
-        }
+        triggerEffects(dep)
     }
 }
+
+export const triggerEffects = (dep: Set<any>) => {
+    for (const effect of dep) {
+        if (effect.scheduler) {
+            effect.scheduler()
+        } else {
+            effect.run()
+        }
+    }
+};
 
 // 停止追踪
 export function stop(runner) {
@@ -115,6 +124,6 @@ export function stop(runner) {
 }
 
 // 正在跟踪
-function isTracking() {
+export function isTracking() {
     return shouldTrack && activeEffect !== undefined
 }
