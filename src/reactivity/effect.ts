@@ -28,6 +28,8 @@ class ReactiveEffect {
         return result
     }
     stop() {
+        // stop(runner) 就是删除effect返回runner中构造的new ReactiveEffect实例
+        // 因为trigger 的时候触发this的run方法,所以stop后trigger就不会执行effect传入的fn
         if (this.active) {
             clearupEffect(this)
             if (this.onStop) {
