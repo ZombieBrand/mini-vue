@@ -8,7 +8,7 @@ let activeEffect: ReactiveEffect
 // }
 type EffectKey = string
 const targetMap = new WeakMap<Record<EffectKey, any>, Map<EffectKey, Set<ReactiveEffect>>>()
-class ReactiveEffect {
+export class ReactiveEffect {
     //用于存储与当前实例相关的响应式对象的property对应的Set实例
     deps: Set<ReactiveEffect>[] = []
     //用于记录当前实例的状态，为 true 时为调用stop方法，否则一调用，避免重复防止重复调用 stop 方法

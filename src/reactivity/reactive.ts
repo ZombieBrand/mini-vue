@@ -11,6 +11,7 @@ export const readonly = (raw: Record<string, any>) => {
 export const shallowReadonly = (raw: Record<string, any>) => {
     return createActiveObject(raw, shallowReadonlyHandlers)
 }
+
 function createActiveObject(raw: Record<string, any>, baseHandlers: ProxyHandler<any>) {
     return new Proxy(raw, baseHandlers)
 }
