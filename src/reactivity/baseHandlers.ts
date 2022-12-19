@@ -2,14 +2,14 @@ import { track, trigger } from './effect';
 import { ReactiveFlags, reactive, readonly } from './reactive';
 import { isObjectLike } from '../utils'
 const createGetter = (isReadonly = false, shallow = false) => {
-    return function getter(target: object, key: PropertyKey) {
+    return function getter(target: object, key: PropertyKey, receiver) {
         if (key === ReactiveFlags.IS_REACTIVE) {
             return !isReadonly
         }
         if (key === ReactiveFlags.IS_READONLY) {
             return isReadonly
         }
-        const res = Reflect.get(target, key)
+        const res = Reflect.get(target, key, receiver)
 
         // 是否浅层响应式
         if (shallow) {
