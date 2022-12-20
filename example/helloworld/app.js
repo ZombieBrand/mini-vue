@@ -5,10 +5,14 @@ export default {
   render() {
     return h('div', {
       id: 'root',
-      class: ['flex', 'container-r']
+      class: ['flex', 'container-r'],
+      onClick() {
+        console.log('onClick')
+      }
     }, [
       h('p', { class: 'red' }, 'red'),
-      h('p', { class: 'blue' }, 'blue')
+      h('p', { class: 'blue' }, 'blue'),
+      h('div', {}, this.name)
     ])
   },
   setup() {

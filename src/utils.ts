@@ -110,3 +110,5 @@ export function deepEqual(object1, object2) {
 
     return true;
 }
+
+export const hasOwn = (target: Record<string, any>, key: any) => Object.prototype.hasOwnProperty.call(target, key)

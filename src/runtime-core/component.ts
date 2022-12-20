@@ -1,5 +1,5 @@
 // 用于处理组件
-
+import { publicInstanceProxyHandlers } from './componentPublicInstance'
 import { isFunction, isObject } from '../utils';
 
 export function createComponentInstance(vnode: any) {
@@ -7,6 +7,7 @@ export function createComponentInstance(vnode: any) {
   const instance = {
     vnode,
     type,
+    setupState: {}
   };
   return instance;
 }
@@ -16,16 +17,18 @@ export function setupComponent(instance: any) {
   // initProps()
   // 初始化slots 暂时不实现
   // initSlots()
-  setupStatefulComonent(instance);
+  setupStatefulComponent(instance);
 }
 
 // 执行setup
-function setupStatefulComonent(instance: any) {
+function setupStatefulComponent(instance: any) {
   const Component = instance.type;
+  // 解决render返回的h()函数里面this的问题，指向setup函数
+  instance.proxy = new Proxy({ _: instance }, publicInstanceProxyHandlers)
   const { setup } = Component;
   if (setup) {
     const setupResult = setup();
-    handleSetupResult(instance, setupResult);
+    handleSetupResult(instance, setupResult)
   }
   finishSetupComponent(instance);
 }
