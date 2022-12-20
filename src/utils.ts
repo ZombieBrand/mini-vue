@@ -112,3 +112,19 @@ export function deepEqual(object1, object2) {
 }
 
 export const hasOwn = (target: Record<string, any>, key: any) => Object.prototype.hasOwnProperty.call(target, key)
+
+
+// 第一个字母转换大写
+const capitalize = (str: string) => {
+    return str.charAt(0).toUpperCase() + str.slice(1)
+}
+// 兼容方案,add-num -> addNum
+export const camelize = (str: string) => {
+    return str.replace(/-(\w)/g, (_, c: string) => {
+        return c ? c.toUpperCase() : ""
+    })
+}
+// 用户传入事件名添加on
+export const toHandlerKey = (event: string) => {
+    return event ? "on" + capitalize(event) : ''
+}

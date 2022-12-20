@@ -1,18 +1,23 @@
 import { mutableHandlers, readonlyHandlers, shallowReadonlyHandlers } from './baseHandlers'
+import { isObject } from '../utils';
 
 export function reactive(raw: Record<string, any>) {
-    return createActiveObject(raw, mutableHandlers)
+    return createReactiveObject(raw, mutableHandlers)
 }
 
 export const readonly = (raw: Record<string, any>) => {
-    return createActiveObject(raw, readonlyHandlers)
+    return createReactiveObject(raw, readonlyHandlers)
 };
 
 export const shallowReadonly = (raw: Record<string, any>) => {
-    return createActiveObject(raw, shallowReadonlyHandlers)
+    return createReactiveObject(raw, shallowReadonlyHandlers)
 }
 
-function createActiveObject(raw: Record<string, any>, baseHandlers: ProxyHandler<any>) {
+function createReactiveObject(raw: Record<string, any>, baseHandlers: ProxyHandler<any>) {
+    if (!isObject(raw)) {
+        console.warn('不是一个对象' + raw)
+        return raw
+    }
     return new Proxy(raw, baseHandlers)
 }
 // 如果是proxy,会触发get中判断是否不是readonly的reactive,否则获取是不存在值返回undefind
