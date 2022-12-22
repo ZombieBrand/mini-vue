@@ -4,6 +4,7 @@ import { isFunction, isObject } from '../utils';
 import { initProps } from './componentProps'
 import { shallowReadonly } from '../reactivity/reactive';
 import { emit } from './componentEmit';
+import { initSlots } from './componentSlots';
 
 export function createComponentInstance(vnode: any) {
   const type = vnode.type;
@@ -12,9 +13,10 @@ export function createComponentInstance(vnode: any) {
     type,
     setupState: {},
     props: {},
-    emit: (event) => {}
+    slots: {},
+    emit: (event) => { }
   };
-  instance.emit = emit.bind(null,instance)
+  instance.emit = emit.bind(null, instance)
   return instance;
 }
 
@@ -22,7 +24,7 @@ export function setupComponent(instance: any) {
   // 初始化props 暂时不实现
   initProps(instance, instance.vnode.props)
   // 初始化slots 暂时不实现
-  // initSlots()
+  initSlots(instance, instance.vnode.children)
   setupStatefulComponent(instance);
 }
 

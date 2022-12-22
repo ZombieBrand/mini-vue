@@ -8,5 +8,5 @@ export function emit(instance, event, ...args) {
 
     const handler = props[handlerName]
 
-    handler && handler(...args)
+    handler?.(...args)
 }
