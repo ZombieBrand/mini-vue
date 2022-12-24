@@ -1,10 +1,20 @@
-export const initSlots = (instance, vnodeChildren) => {
+import { ShapeFlags } from "../ShapeFlags";
 
-    const slots = {}
+export const initSlots = (instance, vnodeChildren) => {
+    const { vnode } = instance
+    if (vnode.shapeFlag & ShapeFlags.SLOT_CHILDREN) {
+        normalizeObjectSlots(vnodeChildren, instance.slots);
+    }
+
+};
+
+function normalizeObjectSlots(vnodeChildren: any, slots: any) {
     for (const key in vnodeChildren) {
         const value = vnodeChildren[key];
-        slots[key] = Array.isArray(value) ? value : [value]
+        slots[key] = (props) => normalizeSlotValue(value(props));
     }
-    instance.slots = slots
-    
-};
+}
+
+function normalizeSlotValue(value) {
+    return Array.isArray(value) ? value : [value]
+}
