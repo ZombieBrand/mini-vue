@@ -27,7 +27,7 @@ export function setupComponent(instance: any) {
   initSlots(instance, instance.vnode.children)
   setupStatefulComponent(instance);
 }
-
+let currentInstance = null
 // 执行setup
 function setupStatefulComponent(instance: any) {
   const Component = instance.type;
@@ -35,7 +35,9 @@ function setupStatefulComponent(instance: any) {
   instance.proxy = new Proxy({ _: instance }, publicInstanceProxyHandlers)
   const { setup } = Component;
   if (setup) {
+    setCurrentInstance(instance)
     const setupResult = setup(shallowReadonly(instance.props), { emit: instance.emit });
+    setCurrentInstance(null)
     handleSetupResult(instance, setupResult)
   }
   finishSetupComponent(instance);
@@ -55,3 +57,11 @@ function finishSetupComponent(instance: any) {
     instance.render = Component.render;
   }
 }
+
+
+export const getCurrentInstance = () => {
+  return currentInstance
+};
+export const setCurrentInstance = (instance) => {
+  currentInstance = instance
+};
