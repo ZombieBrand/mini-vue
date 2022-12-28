@@ -1,3 +1,4 @@
+export { provide, inject } from './apiInject';
 export { getCurrentInstance } from './component';
 export { createApp } from './createApp'
 export { h } from './h'

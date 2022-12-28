@@ -6,7 +6,7 @@ import { shallowReadonly } from '../reactivity/reactive';
 import { emit } from './componentEmit';
 import { initSlots } from './componentSlots';
 
-export function createComponentInstance(vnode: any) {
+export function createComponentInstance(vnode: any, parentComponent) {
   const type = vnode.type;
   const instance = {
     vnode,
@@ -14,7 +14,9 @@ export function createComponentInstance(vnode: any) {
     setupState: {},
     props: {},
     slots: {},
-    emit: (event) => { }
+    emit: (event) => { },
+    provides: parentComponent ? parentComponent.provides : {} as Record<string, any>, // 新增
+    parent: parentComponent, // 新增  父组件的组件实例
   };
   instance.emit = emit.bind(null, instance)
   return instance;
