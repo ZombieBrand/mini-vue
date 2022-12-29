@@ -3,18 +3,20 @@ function createElement(type) {
     console.log("createElement----------------")
     return document.createElement(type)
 }
-function patchProp(el, key, value) {
+function patchProp(el, key, oldValue, nextValue) {
     console.log("patchProp-----------------")
     const isOn = (key: string) => /^on[A-Z]/.test(key)
     if (isOn(key)) {
         const event = key.slice(2).toLowerCase()
-        el.addEventListener(event, value)
+        el.addEventListener(event, nextValue)
     }
 
-    if (Array.isArray(value)) {
-        el.setAttribute(key, value.join(" "));
+    if (Array.isArray(nextValue)) {
+        el.setAttribute(key, nextValue.join(" "));
+    } else if (nextValue === undefined || nextValue === null) {
+        el.removeAttribute(key)
     } else {
-        el.setAttribute(key, value);
+        el.setAttribute(key, nextValue);
     }
 }
 function insert(el, container) {

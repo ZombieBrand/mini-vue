@@ -10,9 +10,10 @@ export const createRenderer = (options) => {
 
   function render(vnode: any, container: any) {
     // 进行拆箱操作
-    console.log("调用 path")
+    console.log("调用 path-------")
     patch(null, vnode, container, null);
   }
+
   function patch(oldVNode, nextVNode: any, container: any, parentComponent) {
     // 区分patch的到底是HTML元素还是组件
     const { shapeFlag, type } = nextVNode
@@ -40,12 +41,15 @@ export const createRenderer = (options) => {
     const textNode = (nextVNode.el = document.createTextNode(children))
     container.append(textNode)
   }
+
   function processFragment(oldVNode, nextVNode, container, parentComponent) {
     mountChildren(nextVNode, container, parentComponent)
   }
+
   function processComponent(oldVNode, nextVNode: any, container: any, parentComponent) {
     mountComponent(nextVNode, container, parentComponent);
   }
+
   function processElement(oldVNode, nextVNode: any, container: any, parentComponent) {
     if (!oldVNode) {
       mountElement(nextVNode, container, parentComponent);
@@ -53,12 +57,43 @@ export const createRenderer = (options) => {
       patchElement(oldVNode, nextVNode, container)
     }
   }
+
   function patchElement(oldVNode, nextVNode, container) {
     console.log("patchElement----------")
     console.log("container", container)
     console.log("oldVNode", oldVNode)
     console.log("nextVNode", nextVNode)
+
+    const oldProps = oldVNode.props || {}
+    const newProps = nextVNode.props || {}
+
+    const el = (nextVNode.el = oldVNode.el)
+    patchProps(el, oldProps, newProps)
   }
+
+  function patchProps(el, oldProps, newProps) {
+    if (!Object.is(oldProps, newProps)) {
+
+      for (const key in newProps) {
+        const oldProp = oldProps[key]
+        const newProp = newProps[key]
+
+        if (!Object.is(oldProp, newProp)) {
+          patchProp(el, key, oldProp, newProp)
+        }
+      }
+
+      if (Object.keys(oldProps).length > 0) {
+        for (const key in oldProps) {
+          if (!(key in newProps)) {
+            patchProp(el, key, oldProps[key], null)
+          }
+        }
+      }
+
+    }
+  }
+
   // 挂载Component
   function mountComponent(initialVNode: any, container: any, parentComponent) {
     const instance = createComponentInstance(initialVNode, parentComponent);
@@ -80,10 +115,11 @@ export const createRenderer = (options) => {
 
     // props
     for (let key of Object.getOwnPropertyNames(props).values()) {
-      patchProp(el, key, props[key])
+      patchProp(el, key, null, props[key])
     }
     insert(el, container)
   }
+
   // 挂载子节点
   function mountChildren(vnode: any, container: any, parentComponent) {
     vnode.children.forEach((vnode: any) => {
@@ -111,6 +147,7 @@ export const createRenderer = (options) => {
 
     })
   }
+
   return {
     createApp: createAppApi(render)
   }
