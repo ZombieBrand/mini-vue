@@ -3,6 +3,7 @@ import { ShapeFlags } from "../ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { Fragment, Text } from "./vnode";
 import { createAppApi } from './createApp';
+import { effect } from "../reactivity";
 
 export const createRenderer = (options) => {
   const { createElement, patchProp, insert } = options
@@ -10,43 +11,53 @@ export const createRenderer = (options) => {
   function render(vnode: any, container: any) {
     // 进行拆箱操作
     console.log("调用 path")
-    patch(vnode, container, null);
+    patch(null, vnode, container, null);
   }
-  function patch(vnode: any, container: any, parentComponent) {
+  function patch(oldVNode, nextVNode: any, container: any, parentComponent) {
     // 区分patch的到底是HTML元素还是组件
-    const { shapeFlag, type } = vnode
+    const { shapeFlag, type } = nextVNode
 
     switch (type) {
       case Fragment:
-        processFragment(vnode, container, parentComponent)
+        processFragment(oldVNode, nextVNode, container, parentComponent)
         break;
       case Text:
-        processText(vnode, container)
+        processText(oldVNode, nextVNode, container)
         break;
       default:
         if (shapeFlag & ShapeFlags.ELEMENT) {
-          processElement(vnode, container, parentComponent);
+          processElement(oldVNode, nextVNode, container, parentComponent);
         } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-          processComponent(vnode, container, parentComponent);
+          processComponent(oldVNode, nextVNode, container, parentComponent);
         }
         break;
     }
 
   }
 
-  function processText(vnode: any, container: any) {
-    const { children } = vnode
-    const textNode = (vnode.el = document.createTextNode(children))
+  function processText(oldVNode, nextVNode: any, container: any) {
+    const { children } = nextVNode
+    const textNode = (nextVNode.el = document.createTextNode(children))
     container.append(textNode)
   }
-  function processFragment(vnode, container, parentComponent) {
-    mountChildren(vnode, container, parentComponent)
+  function processFragment(oldVNode, nextVNode, container, parentComponent) {
+    mountChildren(nextVNode, container, parentComponent)
   }
-  function processComponent(vnode: any, container: any, parentComponent) {
-    mountComponent(vnode, container, parentComponent);
+  function processComponent(oldVNode, nextVNode: any, container: any, parentComponent) {
+    mountComponent(nextVNode, container, parentComponent);
   }
-  function processElement(vnode: any, container: any, parentComponent) {
-    mountElement(vnode, container, parentComponent);
+  function processElement(oldVNode, nextVNode: any, container: any, parentComponent) {
+    if (!oldVNode) {
+      mountElement(nextVNode, container, parentComponent);
+    } else {
+      patchElement(oldVNode, nextVNode, container)
+    }
+  }
+  function patchElement(oldVNode, nextVNode, container) {
+    console.log("patchElement----------")
+    console.log("container", container)
+    console.log("oldVNode", oldVNode)
+    console.log("nextVNode", nextVNode)
   }
   // 挂载Component
   function mountComponent(initialVNode: any, container: any, parentComponent) {
@@ -76,17 +87,29 @@ export const createRenderer = (options) => {
   // 挂载子节点
   function mountChildren(vnode: any, container: any, parentComponent) {
     vnode.children.forEach((vnode: any) => {
-      patch(vnode, container, parentComponent);
+      patch(null, vnode, container, parentComponent);
     });
   }
 
   function setupRenderEffect(instance: any, initialVNode: any, container: any) {
-    // 获取到组件返回的h()函数
-    const subTree = instance.render.call(instance.proxy);
-    // 对组件进行拆箱操作
-    patch(subTree, container, instance);
-    // 代码到了这里，组件内的所有element已经挂在到document里面了
-    initialVNode.el = subTree.el;
+    effect(() => {
+      if (!instance.isMounted) {
+        // 获取到组件返回的h()函数
+        const subTree = (instance.subTree = instance.render.call(instance.proxy))
+        // 对组件进行拆箱操作
+        patch(null, subTree, container, instance);
+        // 代码到了这里，组件内的所有element已经挂在到document里面了
+        initialVNode.el = subTree.el;
+        // 初次挂载完成
+        instance.isMounted = true
+      } else {
+        const subTree = instance.render.call(instance.proxy)
+        const prevSubTree = instance.subTree
+        instance.subTree = subTree
+        patch(prevSubTree, subTree, container, instance);
+      }
+
+    })
   }
   return {
     createApp: createAppApi(render)

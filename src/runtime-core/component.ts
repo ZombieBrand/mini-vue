@@ -5,6 +5,7 @@ import { initProps } from './componentProps'
 import { shallowReadonly } from '../reactivity/reactive';
 import { emit } from './componentEmit';
 import { initSlots } from './componentSlots';
+import { proxyRefs } from '../reactivity';
 
 export function createComponentInstance(vnode: any, parentComponent) {
   const type = vnode.type;
@@ -17,6 +18,8 @@ export function createComponentInstance(vnode: any, parentComponent) {
     emit: (event) => { },
     provides: parentComponent ? parentComponent.provides : {} as Record<string, any>, // 新增
     parent: parentComponent, // 新增  父组件的组件实例
+    isMounted: false,
+    subTree: {} // 虚拟节点树
   };
   instance.emit = emit.bind(null, instance)
   return instance;
@@ -49,7 +52,7 @@ function handleSetupResult(instance: any, setupResult: any) {
   if (isFunction(setupResult)) {
     // 这里处理setup的返回值是h()函数的情况
   } else if (isObject(setupResult)) {
-    instance.setupState = setupResult;
+    instance.setupState = proxyRefs(setupResult)
   }
 }
 
@@ -64,6 +67,7 @@ function finishSetupComponent(instance: any) {
 export const getCurrentInstance = () => {
   return currentInstance
 };
+
 export const setCurrentInstance = (instance) => {
   currentInstance = instance
 };
