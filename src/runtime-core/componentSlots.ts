@@ -1,6 +1,7 @@
 import { ShapeFlags } from "../ShapeFlags";
 
 export const initSlots = (instance, vnodeChildren) => {
+    console.log("initSlots-------------------")
     const { vnode } = instance
     if (vnode.shapeFlag & ShapeFlags.SLOT_CHILDREN) {
         normalizeObjectSlots(vnodeChildren, instance.slots);

@@ -5,11 +5,13 @@ export const Text = Symbol('Text')
 
 // 创建vnode
 export function createVNode(type: any, props?: any, children?: any) {
+  console.log("createVNode-------------------")
   const vnode = {
     type,
     props,
     children,
     shapeFlag: getShapeFlag(type),
+    key:props && props.key,
     el: null
   }
 
@@ -33,5 +35,6 @@ export function getShapeFlag(type) {
 }
 
 export const createTextVNode = (text: string) => {
+  console.log("createTextVNode-------------------")
   return createVNode(Text, {}, text)
 };

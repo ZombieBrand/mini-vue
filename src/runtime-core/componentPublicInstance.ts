@@ -8,7 +8,7 @@ const publicPropertiesMap = {
 export const publicInstanceProxyHandlers: ProxyHandler<any> = {
     // 通过target吧instance传递给get操作
     get({ _: instance }, key: string) {
-
+        console.log('publicInstanceProxyHandlers-----------------')
         const { setupState, props } = instance
 
         if (hasOwn(setupState, key)) {

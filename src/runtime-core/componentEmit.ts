@@ -1,6 +1,7 @@
 import { camelize, toHandlerKey } from "../utils"
 
 export function emit(instance, event, ...args) {
+    console.log("emit-------------------")
     // instance.props -> event
     const { props } = instance
     // props中触发事件

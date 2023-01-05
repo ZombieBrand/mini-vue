@@ -8,6 +8,7 @@ import { initSlots } from './componentSlots';
 import { proxyRefs } from '../reactivity';
 
 export function createComponentInstance(vnode: any, parentComponent) {
+  console.log("createComponentInstance-------------------")
   const type = vnode.type;
   const instance = {
     vnode,
@@ -26,6 +27,7 @@ export function createComponentInstance(vnode: any, parentComponent) {
 }
 
 export function setupComponent(instance: any) {
+  console.log("setupComponent-------------------")
   // 初始化props 暂时不实现
   initProps(instance, instance.vnode.props)
   // 初始化slots 暂时不实现
@@ -35,6 +37,7 @@ export function setupComponent(instance: any) {
 let currentInstance = null
 // 执行setup
 function setupStatefulComponent(instance: any) {
+  console.log("setupStatefulComponent-------------------")
   const Component = instance.type;
   // 解决render返回的h()函数里面this的问题，指向setup函数
   instance.proxy = new Proxy({ _: instance }, publicInstanceProxyHandlers)
@@ -49,6 +52,7 @@ function setupStatefulComponent(instance: any) {
 }
 
 function handleSetupResult(instance: any, setupResult: any) {
+  console.log("handleSetupResult-------------------")
   if (isFunction(setupResult)) {
     // 这里处理setup的返回值是h()函数的情况
   } else if (isObject(setupResult)) {
@@ -57,6 +61,7 @@ function handleSetupResult(instance: any, setupResult: any) {
 }
 
 function finishSetupComponent(instance: any) {
+  console.log("finishSetupComponent-------------------")
   const Component = instance.type;
   if (instance) {
     instance.render = Component.render;
@@ -65,9 +70,11 @@ function finishSetupComponent(instance: any) {
 
 
 export const getCurrentInstance = () => {
+  console.log("getCurrentInstance-------------------")
   return currentInstance
 };
 
 export const setCurrentInstance = (instance) => {
+  console.log("setCurrentInstance-------------------")
   currentInstance = instance
 };

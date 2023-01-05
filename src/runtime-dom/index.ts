@@ -1,8 +1,10 @@
 import { createRenderer } from "../runtime-core"
+
 function createElement(type) {
     console.log("createElement----------------")
     return document.createElement(type)
 }
+
 function patchProp(el, key, oldValue, nextValue) {
     console.log("patchProp-----------------")
     const isOn = (key: string) => /^on[A-Z]/.test(key)
@@ -19,18 +21,35 @@ function patchProp(el, key, oldValue, nextValue) {
         el.setAttribute(key, nextValue);
     }
 }
-function insert(el, container) {
+
+function insert(el, container, anchor) {
     console.log("insert-------------------")
-    container.append(el);
+    container.insertBefore(el, anchor || null)
+}
+
+function remove(child) {
+    console.log("remove-------------------")
+    const parent = child.parentNode
+    if (parent) {
+        parent.removeChild(child)
+    }
+}
+
+function setElementText(el, text) {
+    console.log("setElementText-------------------")
+    el.textContent = text
 }
 
 const renderer: any = createRenderer({
     createElement,
     patchProp,
-    insert
+    insert,
+    remove,
+    setElementText
 })
 
 export const createApp = (...args) => {
+    console.log("createApp-------------------")
     return renderer.createApp(...args)
 };
 
