@@ -3,6 +3,7 @@ import { hasOwn } from '../utils';
 const publicPropertiesMap = {
     $el: (i: any) => i.vnode.el,
     $slots: (i: any) => i.slots,
+    $props: (i: any) => i.props
 };
 
 export const publicInstanceProxyHandlers: ProxyHandler<any> = {
@@ -16,7 +17,7 @@ export const publicInstanceProxyHandlers: ProxyHandler<any> = {
         } else if (hasOwn(props, key)) {
             return props[key]
         }
-        
+
         const publicGetter = publicPropertiesMap[key]
         if (publicGetter) {
             return publicGetter(instance)

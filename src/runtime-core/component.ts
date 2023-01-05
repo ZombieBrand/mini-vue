@@ -16,6 +16,7 @@ export function createComponentInstance(vnode: any, parentComponent) {
     setupState: {},
     props: {},
     slots: {},
+    next: null, // 下次更新虚拟节点
     emit: (event) => { },
     provides: parentComponent ? parentComponent.provides : {} as Record<string, any>, // 新增
     parent: parentComponent, // 新增  父组件的组件实例

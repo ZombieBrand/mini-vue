@@ -5,6 +5,7 @@ import { Fragment, Text } from "./vnode";
 import { createAppApi } from './createApp';
 import { effect } from "../reactivity";
 import { getSequence, isNullAndUnDef } from "../utils";
+import { shouldUpdateComponent } from "./componentUpdateUtils";
 
 export const createRenderer = (options) => {
   console.log('createRenderer----------')
@@ -53,7 +54,23 @@ export const createRenderer = (options) => {
 
   function processComponent(oldVNode, nextVNode: any, container: any, parentComponent, anchor) {
     console.log('processComponent-----------')
-    mountComponent(nextVNode, container, parentComponent, anchor);
+    if (!oldVNode) {
+      mountComponent(nextVNode, container, parentComponent, anchor);
+    } else {
+      updateComponent(oldVNode, nextVNode)
+    }
+  }
+
+  // 更新组件
+  function updateComponent(oldVNode, nextVNode) {
+    const instance = (nextVNode.component = oldVNode.component)
+    if (shouldUpdateComponent(oldVNode, nextVNode)) {
+      instance.next = nextVNode
+      instance.update()
+    } else {
+      nextVNode.el = oldVNode.el
+      instance.vnode = nextVNode
+    }
   }
 
   function processElement(oldVNode, nextVNode: any, container: any, parentComponent, anchor) {
@@ -263,7 +280,7 @@ export const createRenderer = (options) => {
   // 挂载Component
   function mountComponent(initialVNode: any, container: any, parentComponent, anchor) {
     console.log('mountComponent-----------')
-    const instance = createComponentInstance(initialVNode, parentComponent);
+    const instance = (initialVNode.component = createComponentInstance(initialVNode, parentComponent))
     setupComponent(instance);
     setupRenderEffect(instance, initialVNode, container, anchor);
   }
@@ -298,7 +315,7 @@ export const createRenderer = (options) => {
 
   function setupRenderEffect(instance: any, initialVNode: any, container: any, anchor) {
     console.log('setupRenderEffect-----------')
-    effect(() => {
+    instance.update = effect(() => {
       if (!instance.isMounted) {
         // 获取到组件返回的h()函数
         const subTree = (instance.subTree = instance.render.call(instance.proxy))
@@ -309,6 +326,12 @@ export const createRenderer = (options) => {
         // 初次挂载完成
         instance.isMounted = true
       } else {
+        console.log('update setupRenderEffect')
+        const { next, vnode } = instance
+        if (next) {
+          next.el = vnode.el
+          updateComponentPreRender(instance, next)
+        }
         const subTree = instance.render.call(instance.proxy)
         const prevSubTree = instance.subTree
         instance.subTree = subTree
@@ -318,6 +341,12 @@ export const createRenderer = (options) => {
     })
   }
 
+  // 更新组件渲染前更新参数
+  function updateComponentPreRender(instance, nextVNode) {
+    instance.vnode = nextVNode
+    instance.next = null
+    instance.props = nextVNode.props
+  }
   return {
     createApp: createAppApi(render)
   }

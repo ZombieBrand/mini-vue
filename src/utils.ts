@@ -88,27 +88,14 @@ export function isObjectLike(value: unknown) {
     return value != null && typeof value == 'object';
 }
 
-export function deepEqual(object1, object2) {
-    const keys1 = Object.keys(object1);
-    const keys2 = Object.keys(object2);
-
-    if (keys1.length !== keys2.length) {
-        return false;
-    }
-
-    for (const key of keys1) {
-        const val1 = object1[key];
-        const val2 = object2[key];
-        const areObjects = isObject(val1) && isObject(val2);
-        if (
-            (areObjects && !deepEqual(val1, val2)) ||
-            (!areObjects && val1 !== val2)
-        ) {
-            return false;
-        }
-    }
-
-    return true;
+export function deepEqual(a, b) {
+    if (a === b) return true;
+    if (a instanceof Date && b instanceof Date) return a.getTime() === b.getTime();
+    if (!a || !b || (typeof a !== 'object' && typeof b !== 'object')) return a === b;
+    if (a.prototype !== b.prototype) return false;
+    let keys = Object.keys(a);
+    if (keys.length !== Object.keys(b).length) return false;
+    return keys.every(k => deepEqual(a[k], b[k]));
 }
 
 export const hasOwn = (target: Record<string, any>, key: any) => Object.prototype.hasOwnProperty.call(target, key)
