@@ -6,6 +6,7 @@ import { createAppApi } from './createApp';
 import { effect } from "../reactivity";
 import { getSequence, isNullAndUnDef } from "../utils";
 import { shouldUpdateComponent } from "./componentUpdateUtils";
+import { queueJobs } from "./scheduler";
 
 export const createRenderer = (options) => {
   console.log('createRenderer----------')
@@ -338,6 +339,11 @@ export const createRenderer = (options) => {
         patch(prevSubTree, subTree, container, instance, anchor);
       }
 
+    }, {
+      scheduler() {
+        console.log('update,scheduler')
+        queueJobs(instance.update)
+      }
     })
   }
 

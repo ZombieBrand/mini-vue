@@ -1,3 +1,4 @@
+export { nextTick } from './scheduler';
 export { provide, inject } from './apiInject';
 export { getCurrentInstance } from './component';
 export { h } from './h'
