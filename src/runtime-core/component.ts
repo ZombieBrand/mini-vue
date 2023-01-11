@@ -7,6 +7,8 @@ import { emit } from './componentEmit';
 import { initSlots } from './componentSlots';
 import { proxyRefs } from '../reactivity';
 
+let compiler;
+
 export function createComponentInstance(vnode: any, parentComponent) {
   console.log("createComponentInstance-------------------")
   const type = vnode.type;
@@ -64,6 +66,13 @@ function handleSetupResult(instance: any, setupResult: any) {
 function finishSetupComponent(instance: any) {
   console.log("finishSetupComponent-------------------")
   const Component = instance.type;
+
+  if (compiler && !Component.render) {
+    if (Component.template) {
+      Component.render = compiler(Component.template)
+    }
+  }
+  
   if (instance) {
     instance.render = Component.render;
   }
@@ -79,3 +88,8 @@ export const setCurrentInstance = (instance) => {
   console.log("setCurrentInstance-------------------")
   currentInstance = instance
 };
+
+
+export function registerRuntimeCompiler(_compiler) {
+  compiler = _compiler
+}

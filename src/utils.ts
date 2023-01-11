@@ -28,7 +28,7 @@ export const isUnDef = <T = unknown>(val?: T): val is T => {
  * @description: 是否为对象
  */
 export const isObject = (val: any): val is Record<any, any> => {
-    console.log(is(val, 'Object'),val)
+    console.log(is(val, 'Object'), val)
     return val !== null && is(val, 'Object');
 };
 
@@ -158,3 +158,7 @@ export function getSequence(arr: number[]): number[] {
     }
     return result;
 }
+
+export const toDisplayString = (value) => {
+    return String(value)
+};

@@ -300,9 +300,11 @@ export const createRenderer = (options) => {
     }
 
     // props
-    for (let key of Object.getOwnPropertyNames(props).values()) {
-      patchProp(el, key, null, props[key])
+    for (const key in props) {
+      const val = props[key];
+      patchProp(el, key, null, val);
     }
+
     insert(el, container, anchor)
   }
 
@@ -319,7 +321,7 @@ export const createRenderer = (options) => {
     instance.update = effect(() => {
       if (!instance.isMounted) {
         // 获取到组件返回的h()函数
-        const subTree = (instance.subTree = instance.render.call(instance.proxy))
+        const subTree = (instance.subTree = instance.render.call(instance.proxy, instance.proxy))
         // 对组件进行拆箱操作
         patch(null, subTree, container, instance, anchor);
         // 代码到了这里，组件内的所有element已经挂在到document里面了
@@ -333,7 +335,7 @@ export const createRenderer = (options) => {
           next.el = vnode.el
           updateComponentPreRender(instance, next)
         }
-        const subTree = instance.render.call(instance.proxy)
+        const subTree = instance.render.call(instance.proxy, instance.proxy)
         const prevSubTree = instance.subTree
         instance.subTree = subTree
         patch(prevSubTree, subTree, container, instance, anchor);
