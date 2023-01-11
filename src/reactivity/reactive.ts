@@ -1,5 +1,5 @@
 import { mutableHandlers, readonlyHandlers, shallowReadonlyHandlers } from './baseHandlers'
-import { isObject } from '../utils';
+import { isObjectLike } from '../utils';
 
 export function reactive(raw: Record<string, any>) {
     return createReactiveObject(raw, mutableHandlers)
@@ -14,7 +14,7 @@ export const shallowReadonly = (raw: Record<string, any>) => {
 }
 
 function createReactiveObject(raw: Record<string, any>, baseHandlers: ProxyHandler<any>) {
-    if (!isObject(raw)) {
+    if (!isObjectLike(raw)) {
         console.warn('不是一个对象' + raw)
         return raw
     }
