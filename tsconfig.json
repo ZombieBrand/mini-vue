@@ -7,9 +7,7 @@
     ],
     "module": "esnext",
     "moduleResolution": "node",
-    "types": [
-      "jest"
-    ],
+    "types": ["vitest/globals"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true, 

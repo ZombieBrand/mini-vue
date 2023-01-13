@@ -46,6 +46,7 @@ function clearupEffect(effect: ReactiveEffect) {
     })
     effect.deps.length = 0
 }
+
 /**
  * vue作用域创建
  * @param fn - 运行时将被调用的函数
@@ -62,8 +63,6 @@ export function effect(fn: Function, options: any = {}) {
 
     return runner
 }
-
-
 
 /**
  * 依赖收集方法
